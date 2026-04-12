@@ -200,12 +200,7 @@ body {
   cursor: pointer;
   gap: 0.25rem;
 }
-}
 
-  border-color: var(--primary);
-  background: #e0edfd;
-  box-shadow: 0 2px 8px 0 rgba(60, 120, 200, 0.10);
-}
 
 .exam-info h4 {
   font-size: 0.92rem;
@@ -231,6 +226,7 @@ body {
   color: #475569;
 }
 
+.badge-month {
   background: #e0f2fe;
   color: #0369a1;
   font-size: 0.78em;
