@@ -272,8 +272,6 @@ body {
     width: 100%;
   }
 }
-<<<<<<< HEAD
-=======
 @media (max-width: 600px) {
   .container {
     max-width: 100vw;
@@ -339,4 +337,4 @@ body {
     border-radius: 7px;
   }
 }
->>>>>>> b46a4e7 (Mejoras visuales, agrupación por mes y corrección de tarjetas para móvil y web)
+
