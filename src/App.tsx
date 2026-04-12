@@ -15,13 +15,11 @@ function App() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    
+
     if (dni.length < 1) return;
-    
-    // Normalize DNI to 8 digits if needed (optional since we clean it anyway)
-    // but the user said "solo 8 digitos" and "formatearlos"
+
     const cleaned = cleanDni(dni);
-    
+
     setLoading(true);
     setError(null);
     setData(null);
@@ -64,19 +62,29 @@ function App() {
                 type="text"
                 placeholder="Ingrese su DNI (8 dígitos)"
                 value={dni}
-                onChange={(e) => setDni(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                onChange={(e) =>
+                  setDni(e.target.value.replace(/\D/g, '').slice(0, 8))
+                }
                 maxLength={8}
                 disabled={loading}
               />
             </div>
-            <button className="btn" type="submit" disabled={loading || dni.length < 1}>
-              {loading ? <Loader2 className="loader" size={20} /> : 'Consultar'}
+            <button
+              className="btn"
+              type="submit"
+              disabled={loading || dni.length < 1}
+            >
+              {loading ? (
+                <Loader2 className="loader" size={20} />
+              ) : (
+                'Consultar'
+              )}
             </button>
           </form>
 
           <AnimatePresence>
             {error && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="error-msg"
@@ -89,7 +97,7 @@ function App() {
 
           <AnimatePresence>
             {data && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 className="user-info"
@@ -109,7 +117,7 @@ function App() {
         <section>
           <AnimatePresence mode="wait">
             {!data && !loading && !error && (
-              <motion.div 
+              <motion.div
                 key="empty"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -122,128 +130,94 @@ function App() {
             )}
 
             {data && data.pending.length > 0 && (
-              <motion.div 
+              <motion.div
                 key="results"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="exam-grid"
               >
-                <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div
+                  style={{
+                    marginBottom: '0.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
                   <h2 style={{ fontSize: '1rem', fontWeight: 700 }}>
                     Pendientes ({data.pending.length})
                   </h2>
                 </div>
-                {/* Agrupación por MES */}
+
                 {Object.entries(
-                  data.pending.reduce((acc: Record<string, ExamMetadata[]>, exam: ExamMetadata) => {
-                    const group = exam.MES && exam.MES.trim() ? exam.MES : 'Sin Mes';
-                    if (!acc[group]) acc[group] = [];
-                    acc[group].push(exam);
-                    return acc;
-                  }, {})
-                ).sort(([a], [b]) => a.localeCompare(b)).map(([mes, exams]) => (
-                  <div key={mes} style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0.5rem 0', fontWeight: 700, color: '#0369a1', fontSize: '1.05em' }}>
-                      <Calendar size={16} />
-                      {mes}
-                    </div>
-                    {exams.map((exam, idx) => (
-                      <motion.div 
-                        key={exam.CODIGO + idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="exam-card"
+                  data.pending.reduce(
+                    (acc: Record<string, ExamMetadata[]>, exam: ExamMetadata) => {
+                      const group =
+                        exam.MES && exam.MES.trim() ? exam.MES : 'Sin Mes';
+                      if (!acc[group]) acc[group] = [];
+                      acc[group].push(exam);
+                      return acc;
+                    },
+                    {}
+                  )
+                )
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([mes, exams]) => (
+                    <div key={mes} style={{ marginBottom: '0.75rem', marginLeft: '1.2rem' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          margin: '0.5rem 0',
+                          fontWeight: 700,
+                          color: '#0369a1',
+                          fontSize: '1.05em',
+                          marginLeft: '0.2rem'
+                        }}
                       >
-                        <div className="exam-info">
-                          <h4>{exam.TEMA}</h4>
-                          <div className="meta">
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <Tag size={12} /> {exam.CODIGO}
-                            </span>
-                            {exam.AREA && (
+                        <Calendar size={16} />
+                        {mes}
+                      </div>
+
+                      {exams.map((exam, idx) => (
+                        <motion.div
+                          key={exam.CODIGO + idx}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className="exam-card"
+                          style={{ marginLeft: '1.2rem' }}
+                        >
+                          <div className="exam-info">
+                            <h4>{exam.TEMA}</h4>
+                            <div className="meta">
                               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <BookOpen size={12} /> {exam.AREA}
+                                <Tag size={12} /> {exam.CODIGO}
                               </span>
-                            )}
+                              {exam.AREA && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <BookOpen size={12} /> {exam.AREA}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        {exam.MES && (
-                          <div className="badge badge-month">
-                            <Calendar size={12} style={{ marginRight: '4px' }} />
-                            {exam.MES}
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                ))}
-              </motion.div>
-                {/* Agrupación por MES */}
-                {Object.entries(
-                  data.pending.reduce((acc: Record<string, ExamMetadata[]>, exam: ExamMetadata) => {
-                    const group = exam.MES && exam.MES.trim() ? exam.MES : 'Sin Mes';
-                    if (!acc[group]) acc[group] = [];
-                    acc[group].push(exam);
-                    return acc;
-                  }, {})
-                ).sort(([a], [b]) => a.localeCompare(b)).map(([mes, exams]) => (
-                  <div key={mes} style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0.5rem 0', fontWeight: 700, color: '#0369a1', fontSize: '1.05em' }}>
-                      <Calendar size={16} />
-                      {mes}
+                        </motion.div>
+                      ))}
                     </div>
->>>>>>> 1652da5 (V1: Agrupación de exámenes por mes en la vista)
-                    {exams.map((exam, idx) => (
-                      <motion.div 
-                        key={exam.CODIGO + idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="exam-card"
-                      >
-                        <div className="exam-info">
-                          <h4>{exam.TEMA}</h4>
-                          <div className="meta">
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <Tag size={12} /> {exam.CODIGO}
-                            </span>
-                            {exam.AREA && (
-                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <BookOpen size={12} /> {exam.AREA}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-<<<<<<< HEAD
-                      </motion.div>
-                    ))}
-                  </div>
->>>>>>> b46a4e7 (Mejoras visuales, agrupación por mes y corrección de tarjetas para móvil y web)
-=======
-                        {exam.MES && (
-                          <div className="badge badge-month">
-                            <Calendar size={12} style={{ marginRight: '4px' }} />
-                            {exam.MES}
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
->>>>>>> 1652da5 (V1: Agrupación de exámenes por mes en la vista)
-                ))}
+                  ))}
               </motion.div>
             )}
 
             {data && data.pending.length === 0 && (
-              <motion.div 
+              <motion.div
                 key="all-done"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="empty-state"
               >
                 <div style={{ color: 'var(--success)', marginBottom: '1rem' }}>
-                   <div style={{ fontSize: '3rem' }}>🎉</div>
+                  <div style={{ fontSize: '3rem' }}>🎉</div>
                 </div>
                 <h3>¡Todo completado!</h3>
                 <p>No tienes exámenes pendientes programados.</p>
@@ -252,8 +226,16 @@ function App() {
           </AnimatePresence>
         </section>
       </main>
-      
-      <footer style={{ marginTop: 'auto', padding: '2rem 1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem' }}>
+
+      <footer
+        style={{
+          marginTop: 'auto',
+          padding: '2rem 1rem',
+          textAlign: 'center',
+          color: '#94a3b8',
+          fontSize: '0.75rem'
+        }}
+      >
         Actualización de datos cada 5 minutos • PAC System v1.0
       </footer>
     </div>
