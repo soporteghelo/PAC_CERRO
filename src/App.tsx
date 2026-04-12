@@ -133,54 +133,19 @@ function App() {
                     Pendientes ({data.pending.length})
                   </h2>
                 </div>
-<<<<<<< HEAD
-                {data.pending.map((exam, idx) => (
-                  <motion.div 
-                    key={exam.CODIGO + idx}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="exam-card"
-                  >
-                    <div className="exam-info">
-                      <h4>{exam.TEMA}</h4>
-                      <div className="meta">
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Tag size={12} /> {exam.CODIGO}
-                        </span>
-                        {exam.AREA && (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <BookOpen size={12} /> {exam.AREA}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {exam.MES && (
-                      <div className="badge badge-month">
-                        <Calendar size={12} style={{ marginRight: '4px' }} />
-                        {exam.MES}
-                      </div>
-                    )}
-                  </motion.div>
-=======
-                {/* Agrupación por mes y año */}
+                {/* Agrupación por MES */}
                 {Object.entries(
-                  data.pending.reduce((acc, exam) => {
-                    // Extrae mes y año, si no hay MES, agrupa como 'Sin Mes'
-                    let group = 'Sin Mes';
-                    if (exam.MES) {
-                      // Permite formatos tipo 'Abril 2026', '04/2026', etc.
-                      group = exam.MES;
-                    }
+                  data.pending.reduce((acc: Record<string, ExamMetadata[]>, exam: ExamMetadata) => {
+                    const group = exam.MES && exam.MES.trim() ? exam.MES : 'Sin Mes';
                     if (!acc[group]) acc[group] = [];
                     acc[group].push(exam);
                     return acc;
-                  }, {} as Record<string, ExamMetadata[]>)
-                ).sort(([a], [b]) => a.localeCompare(b)).map(([group, exams]) => (
-                  <div key={group} style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0.5rem 0 0.5rem 0', fontWeight: 700, color: '#0369a1', fontSize: '1.05em' }}>
+                  }, {})
+                ).sort(([a], [b]) => a.localeCompare(b)).map(([mes, exams]) => (
+                  <div key={mes} style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0.5rem 0', fontWeight: 700, color: '#0369a1', fontSize: '1.05em' }}>
                       <Calendar size={16} />
-                      {group}
+                      {mes}
                     </div>
                     {exams.map((exam, idx) => (
                       <motion.div 
@@ -203,10 +168,69 @@ function App() {
                             )}
                           </div>
                         </div>
+                        {exam.MES && (
+                          <div className="badge badge-month">
+                            <Calendar size={12} style={{ marginRight: '4px' }} />
+                            {exam.MES}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                ))}
+              </motion.div>
+                {/* Agrupación por MES */}
+                {Object.entries(
+                  data.pending.reduce((acc: Record<string, ExamMetadata[]>, exam: ExamMetadata) => {
+                    const group = exam.MES && exam.MES.trim() ? exam.MES : 'Sin Mes';
+                    if (!acc[group]) acc[group] = [];
+                    acc[group].push(exam);
+                    return acc;
+                  }, {})
+                ).sort(([a], [b]) => a.localeCompare(b)).map(([mes, exams]) => (
+                  <div key={mes} style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0.5rem 0', fontWeight: 700, color: '#0369a1', fontSize: '1.05em' }}>
+                      <Calendar size={16} />
+                      {mes}
+                    </div>
+>>>>>>> 1652da5 (V1: Agrupación de exámenes por mes en la vista)
+                    {exams.map((exam, idx) => (
+                      <motion.div 
+                        key={exam.CODIGO + idx}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="exam-card"
+                      >
+                        <div className="exam-info">
+                          <h4>{exam.TEMA}</h4>
+                          <div className="meta">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Tag size={12} /> {exam.CODIGO}
+                            </span>
+                            {exam.AREA && (
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <BookOpen size={12} /> {exam.AREA}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+<<<<<<< HEAD
                       </motion.div>
                     ))}
                   </div>
 >>>>>>> b46a4e7 (Mejoras visuales, agrupación por mes y corrección de tarjetas para móvil y web)
+=======
+                        {exam.MES && (
+                          <div className="badge badge-month">
+                            <Calendar size={12} style={{ marginRight: '4px' }} />
+                            {exam.MES}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+>>>>>>> 1652da5 (V1: Agrupación de exámenes por mes en la vista)
                 ))}
               </motion.div>
             )}
