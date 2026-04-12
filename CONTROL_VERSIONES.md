@@ -1,7 +1,11 @@
 # Control de Versiones
 
-## V3
+## V3.1
+- CSS limpio y listo para build en Vercel
+- Se eliminaron conflictos y se validó la compatibilidad para despliegue en producción.
+- Commit y push realizados el 2026-04-12.
 
+## V3
 - Fix: elimina selectores vacíos y llaves sueltas en CSS para build exitoso en Vercel
 - Se realizaron ajustes en el archivo CSS para asegurar compatibilidad con el sistema de build de Vercel y evitar errores de sintaxis.
 - Commit y push realizados para garantizar despliegue exitoso en producción.
