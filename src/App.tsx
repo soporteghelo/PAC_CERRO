@@ -50,7 +50,8 @@ function App() {
     <div className="container">
       <header className="header">
         <h1>Control de Evaluaciones</h1>
-        <p>Consulta tus exámenes programados pendientes</p>
+        <p>Consulta tus exámenes programados pendientes aquí</p>
+        <p>Regresa a la pagina anterior para rendir evaluaciones</p>
       </header>
 
       <main>
