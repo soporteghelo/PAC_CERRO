@@ -63,13 +63,38 @@ const fetchData = async () => {
   const recopiladoSheet = dataWb.Sheets['RECOPILADO'];
   const recopiladoData: any[] = XLSX.utils.sheet_to_json(recopiladoSheet);
   
-  const recopiladoClean: ExamRecord[] = recopiladoData
-    .filter(r => Number(r.Puntuación) >= 12 && r.TEMA)
-    .map(r => ({
-      DNI: cleanDni(String(r.DNI)),
-      TEMA: String(r.TEMA).toUpperCase().trim(),
-      Puntuación: Number(r.Puntuación)
-    }));
+
+  // Limpieza robusta tipo Power Query
+  const recopiladoClean: ExamRecord[] = (() => {
+    // 1. Limpieza y normalización de campos
+    let procesados = recopiladoData.map((row: any) => {
+      // Limpia puntuación: soporta '20 / 20', '15', etc.
+      let puntRaw = String(row.Puntuación ?? '').replace('/ 20', '').replace(',', '.').trim();
+      let puntuacion = Number(puntRaw);
+      // Limpia DNI y TEMA
+      let dni = row.DNI == null ? '' : cleanDni(String(row.DNI));
+      let tema = row.TEMA == null ? '' : String(row.TEMA).toUpperCase().trim();
+      return {
+        ...row,
+        DNI: dni,
+        TEMA: tema,
+        Puntuación: puntuacion
+      };
+    });
+
+    // 2. Filtra solo aprobados (>=12) y TEMA no vacío
+    procesados = procesados.filter(row => !isNaN(row.Puntuación) && row.Puntuación >= 12 && row.TEMA !== '');
+
+    // 3. Elimina duplicados por DNI y TEMA
+    const vistos = new Set();
+    const unicos = procesados.filter(row => {
+      const clave = row.DNI + '|' + row.TEMA;
+      if (vistos.has(clave)) return false;
+      vistos.add(clave);
+      return true;
+    });
+    return unicos;
+  })();
 
   // 3. activeThemes (Universe from RECOPILADO)
   const activeThemes = Array.from(new Set(
