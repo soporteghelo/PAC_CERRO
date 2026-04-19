@@ -26,16 +26,18 @@ const parseDateValue = (val: any): Date | null => {
   return isNaN(d.getTime()) ? null : d;
 };
 
-const fetchData = async () => {
-  const cached = localStorage.getItem(CACHE_KEY);
-  if (cached) {
-    const parsed: CacheData = JSON.parse(cached);
-    // Convert back stringified dates to Date objects if needed
-    parsed.personal.forEach(p => { p.FEC_ING = parseDateValue(p.FEC_ING); });
-    parsed.masterList.forEach(m => { m.INICIO_TEMA = parseDateValue(m.INICIO_TEMA); });
+const fetchData = async (forceRefresh = false) => {
+  if (!forceRefresh) {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const parsed: CacheData = JSON.parse(cached);
+      // Convert back stringified dates to Date objects if needed
+      parsed.personal.forEach(p => { p.FEC_ING = parseDateValue(p.FEC_ING); });
+      parsed.masterList.forEach(m => { m.INICIO_TEMA = parseDateValue(m.INICIO_TEMA); });
 
-    if (Date.now() - parsed.timestamp < CACHE_DURATION) {
-      return parsed;
+      if (Date.now() - parsed.timestamp < CACHE_DURATION) {
+        return parsed;
+      }
     }
   }
 
@@ -131,7 +133,8 @@ const fetchData = async () => {
 
 export const getPendingExams = async (inputDni: string) => {
   const dni = cleanDni(inputDni);
-  const data = await fetchData();
+  // Siempre forzar recarga de datos (ignorar caché)
+  const data = await fetchData(true);
 
   const person = data.personal.find(p => p.DNI === dni);
   if (!person) {
