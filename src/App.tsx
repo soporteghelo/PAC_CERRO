@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, AlertCircle, BookOpen, User, Calendar, Tag } from 'lucide-react';
+import { Search, Loader2, AlertCircle, BookOpen, User, Calendar, Tag, ArrowLeft, FileText, Monitor, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPendingExams, cleanDni } from './services/dataService';
 import type { PersonalRecord, ExamMetadata } from './types';
@@ -12,6 +12,31 @@ function App() {
     person: PersonalRecord;
     pending: ExamMetadata[];
   } | null>(null);
+  const [modal, setModal] = useState<{ url: string; label: string } | null>(null);
+  const [showExamReminder, setShowExamReminder] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+
+  const getModalConfig = (url: string): { type: 'iframe' | 'video'; src: string } => {
+    // Google Drive /view → /preview (único formato que permite embedding)
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/?]+)/);
+    if (driveMatch) {
+      return { type: 'iframe', src: `https://drive.google.com/file/d/${driveMatch[1]}/preview` };
+    }
+    // AppSheet video URL → <video> tag (bypasses X-Frame-Options)
+    if (url.includes('appsheet.com') && url.toLowerCase().includes('.mp4')) {
+      return { type: 'video', src: url };
+    }
+    return { type: 'iframe', src: url };
+  };
+
+  const closeModal = () => {
+    if (modal?.label === 'Rendir Examen') {
+      setShowExamReminder(true);
+      setTimeout(() => setShowExamReminder(false), 8000);
+    }
+    setModal(null);
+    setVideoError(false);
+  };
 
   const handleSearch = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -47,6 +72,7 @@ function App() {
   }, [dni]);
 
   return (
+    <>
     <div className="container">
       <header className="header">
         <h1>Control de Evaluaciones</h1>
@@ -202,6 +228,34 @@ function App() {
                                 </span>
                               )}
                             </div>
+                            {(exam.LINK_EXAMEN || exam.LINK_PRESENTACION || exam.LINK_VIDEO) && (
+                              <div className="exam-links">
+                                {exam.LINK_EXAMEN && (
+                                  <button
+                                    className="link-btn examen"
+                                    onClick={() => setModal({ url: exam.LINK_EXAMEN!, label: 'Rendir Examen' })}
+                                  >
+                                    <FileText size={13} /> Examen
+                                  </button>
+                                )}
+                                {exam.LINK_PRESENTACION && (
+                                  <button
+                                    className="link-btn material"
+                                    onClick={() => setModal({ url: exam.LINK_PRESENTACION!, label: 'Material' })}
+                                  >
+                                    <Monitor size={13} /> Material
+                                  </button>
+                                )}
+                                {exam.LINK_VIDEO && (
+                                  <button
+                                    className="link-btn video"
+                                    onClick={() => setModal({ url: exam.LINK_VIDEO!, label: 'Video' })}
+                                  >
+                                    <Play size={13} /> Video
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </motion.div>
                       ))}
@@ -240,6 +294,83 @@ function App() {
         Actualización de datos cada 5 minutos • PAC System v1.0
       </footer>
     </div>
+
+    <AnimatePresence>
+      {modal && (
+        <motion.div
+          className="modal-overlay"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 30 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="modal-header">
+            <button className="modal-back-btn" onClick={closeModal}>
+              <ArrowLeft size={18} /> Volver
+            </button>
+            <span className="modal-label">{modal.label}</span>
+          </div>
+          {(() => {
+            const cfg = getModalConfig(modal.url);
+            if (cfg.type === 'video') {
+              return videoError ? (
+                <div className="modal-fallback">
+                  <p>El video no pudo cargarse en esta vista.</p>
+                  <a href={modal.url} target="_blank" rel="noopener noreferrer" className="modal-open-btn">
+                    Abrir video en nueva pestaña
+                  </a>
+                </div>
+              ) : (
+                <video
+                  key={cfg.src}
+                  src={cfg.src}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="modal-iframe"
+                  style={{ background: '#000', objectFit: 'contain' }}
+                  onError={() => setVideoError(true)}
+                />
+              );
+            }
+            return (
+              <iframe
+                src={cfg.src}
+                className="modal-iframe"
+                title={modal.label}
+                allow="fullscreen"
+              />
+            );
+          })()}
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    <AnimatePresence>
+      {showExamReminder && (
+        <div className="exam-reminder-overlay">
+          <motion.div
+            className="exam-reminder"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ duration: 0.25, type: 'spring', stiffness: 320, damping: 26 }}
+          >
+            <div className="exam-reminder-body">
+              <p className="exam-reminder-title">⏱ Vuelve a consultar en 5 minutos</p>
+              <p className="exam-reminder-subtitle">Ingresa tu DNI nuevamente para verificar que el examen ya no aparece.</p>
+              <ul className="exam-reminder-list">
+                <li>La <strong>nota mínima aprobatoria es 16</strong></li>
+                <li>Asegúrate de haber ingresado tu <strong>DNI correctamente</strong></li>
+                <li>La fecha del examen debe coincidir con el <strong>mes programado</strong> de tu capacitación</li>
+              </ul>
+            </div>
+            <button className="exam-reminder-close" onClick={() => setShowExamReminder(false)}>Entendido</button>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+    </>
   );
 }
 

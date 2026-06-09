@@ -116,7 +116,10 @@ const fetchData = async (forceRefresh = false) => {
       MES: String(m.MES || ''),
       AREA: String(m.AREA || ''),
       CATEGORIA: String(m.CATEGORIA || ''),
-      INICIO_TEMA: parseDateValue(m.INICIO_TEMA)
+      INICIO_TEMA: parseDateValue(m.INICIO_TEMA),
+      LINK_EXAMEN: m.LINK_EXAMEN ? String(m.LINK_EXAMEN).trim() : '',
+      LINK_PRESENTACION: m.LINK_PRESENTACION ? String(m.LINK_PRESENTACION).trim() : '',
+      LINK_VIDEO: m.LINK_VIDEO ? String(m.LINK_VIDEO).trim() : ''
     }));
 
   const cache: CacheData = {

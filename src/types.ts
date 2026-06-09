@@ -12,6 +12,9 @@ export interface ExamMetadata {
   AREA?: string;
   CATEGORIA?: string;
   INICIO_TEMA?: Date | string | null;
+  LINK_EXAMEN?: string;
+  LINK_PRESENTACION?: string;
+  LINK_VIDEO?: string;
 }
 
 export interface PersonalRecord {
